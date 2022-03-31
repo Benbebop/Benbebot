@@ -1,6 +1,18 @@
 local holidays = {d = {}, m = {}}
 
-local e = {pface = "🥳", fist = "✊", beers = "🍻", french = "\xF0\x9F\x87\xA8\xF0\x9F\x87\xA6", canada = "\xF0\x9F\x87\xA8\xF0\x9F\x87\xA6", circ_orange = "🟠", gay = "🏳️‍🌈", turkey = "🦃", pump = "🎃", w_tree = "🎄"}
+local e = {
+	pface = "\xF0\x9F\xA5\xB3", 
+	fist = "\xE2\x9C\x8A", 
+	beers = "\xF0\x9F\x8D\xBB", 
+	french = "\xEE\x94\x8D", 
+	canada = "\xF0\x9F\x87\xA8\xF0\x9F\x87\xA6", 
+	circ_orange = "\xF0\x9F\x9F\xA0", 
+	gay = "\xF0\x9F\x8F\xB3\xEF\xB8\x8F\xE2\x80\x8D\xF0\x9F\x8C\x88", 
+	turkey = "\xF0\x9F\xA6\x83", 
+	pump = "\xF0\x9F\x8E\x83", 
+	w_tree = "\xF0\x9F\x8E\x84", 
+	ind_i = "\xE1\x90\x83", ind_nu = "\xE1\x93\x84", ind_k = "\xE1\x92\x83", ind_ti = "\xE1\x91\x8E", ind_tu = "\xE1\x91\x90", ind_t = "\xE1\x91\xA6"
+}
 
 local hdefault = {
 	avatar = "default.jpg",
@@ -19,9 +31,8 @@ holidays.d["0101"] = { -- NEW YEAR
 
 holidays.m["02"] = { -- BLACK HISTORY
 	avatar = nil,
-	name = e.fist .. " benbebot " .. e.fist,
-	text = "Black History Month",
-	game = nil
+	name = "benbebot",
+	text = "Black History Month"
 }
 
 holidays.d["1703"] = { -- ST PATRIC
@@ -33,7 +44,7 @@ holidays.d["1703"] = { -- ST PATRIC
 
 holidays.d["2106"] = { -- INDIGENOUS DAY
 	avatar = "indig.jpg",
-	name = "ᓕᑦᑖᒍᑎᒃ", -- Olittâgutik
+	name = e.ind_i .. e.ind_nu .. e.ind_k .. e.ind_ti .. e.ind_tu .. e.ind_t, -- Olittâgutik
 	text = "Indigenous Peoples Day",
 	game = "none"
 }
@@ -53,7 +64,7 @@ holidays.d["0107"] = { -- CANADA DAY
 	avatar = "canada_day.jpg",
 	name = e.canada .. " benbebot " .. e.canada,
 	text = "Canada Day",
-	game = "Sex Simulator"
+	game = "Syrup Simulator"
 }
 
 holidays.d["0508"] = { -- HERITAGE DAY
@@ -89,6 +100,10 @@ holidays.d["3110"] = { -- HALLOWEEN
 	name = e.pump .. " benbebot " .. e.pump,
 	text = "Halloween",
 	game = "Phasmophobia"
+}
+
+holidays.d["1011"] = { -- FO4 RELEASE
+	game = "Fallout 4"
 }
 
 holidays.d["1111"] = { -- REMEMBRANCE DAY
