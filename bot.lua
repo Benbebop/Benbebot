@@ -1,4 +1,7 @@
-local discordia, http, json, thread, lwz, roleGiver, appdata, holiday = require('discordia'), require("coro-http"), require("json"), require("coro-thread-work"), require("./lua/lualwz"), require("./lua/roleGiver"), require("./lua/appdata"), require("./lua/holiday")
+local discordia, http, json, thread, lwz, roleGiver, appdata, holiday, tokens = require('discordia'), require("coro-http"), require("json"), require("coro-thread-work"), require("./lua/lualwz"), require("./lua/roleGiver"), require("./lua/appdata"), require("./lua/holiday"), require("./lua/token")
+
+appdata.init({{"permaroles.dat","{}"},{"company.dat", "{}"},{"employed.dat","{}"}})
+
 local client = discordia.Client()
 local dClock = discordia.Clock()
 local discordiaPackage = require('discordia\\package')
@@ -61,14 +64,22 @@ end)
 command.new("help", function( message, arg )
 	local target = command.get(arg or "")
 	if target and not arg:match("help") then message.channel:send(arg .. " " .. target.stx .. "| " .. target.desc) return end
-	local str = ""
+	local content = {}
 	for _,v in ipairs(command.get()) do
 		if not v.stx:match("^%s?$") then
 			v.stx = v.stx .. " "
 		end
-		str = str .. "bbb " .. v.name .. " " .. v.stx .. "| " .. v.desc .. "\n"
+		table.insert(content, {name = "bbb " .. v.name .. " " .. v.stx, value = v.desc, inline = true})
 	end
-	message.channel:send(str)
+	message.channel:send({
+		embed = {
+			--title = "",
+			fields = content,
+			--description = desc,
+			--timestamp = discordia.Date():toISO('T', 'Z')
+		},
+		refrence = {message = message.id, mention = false}
+	})
 end, nil, "shows a list of commands", true)
 
 command.new("status", function( message ) -- RETURNS STATUS OF SERVER --
@@ -89,15 +100,28 @@ command.new("event", function( message, argument ) -- RUNS AN EVENT --
 end, "<event id>", "runs an event in the server")
 
 command.new("random", function( message, argument ) -- MAKES A RANDOM NUMBER --
-	local initial, final = argument:match("(%d+)%s(%d+)%s*$")
+	local initial, final = argument:match("(%-?%d+)%s(%-?%d+)%s*$")
 	if initial and final then
+		initial, final = tonumber(initial), tonumber(final)
+		if initial > final then initial, final = final, initial end
 		message.channel:send(tostring(math.random(initial, final)))
 	end
 end, "<lower limit> <upper limit>", "generates a random number")
 
 command.new("define", function( message, argument ) -- DEFINES A WORD --
-	local success, result = websters.getDefinition( argument:match("(%a+)%s*$") )
-	if result then
+	local success, content, found, title = websters.getDefinition( argument:match("(%a+)%s*$") )
+	if content then
+		local desc = nil
+		if not found then desc = "no definition exists for your word, here are some suggestions" end
+		message.channel:send({
+			embed = {
+				title = title,
+				fields = content,
+				description = desc,
+				timestamp = discordia.Date():toISO('T', 'Z')
+				},
+			refrence = {message = message.id, mention = false}
+		})
 		message.channel:send(result)
 	elseif success then
 		message.channel:send("couldnt find definition for " .. todefine)
@@ -166,7 +190,7 @@ command.new("pp", function( message ) -- PENID --
 	})
 end, "<target>", "imperical measurement of a man's penis")
 
-command.new("randomyt", function( message ) -- PENID --
+command.new("ryt", function( message ) -- PENID --
 	message.channel:broadcastTyping()
 	local _, result = http.request("GET", "https://petittube.com/")
 	result = result:match("<iframe%s?width=\"%d+\"%s?height=\"%d+\"%s?src=\"(.+)\"%s?frameborder=\"%d+\"%s?allowfullscreen>")
@@ -215,6 +239,8 @@ command.new("forceemploy", function( message ) -- PENID --
 		initFile = appdata.get("employed.dat", "w+")
 		initFile:write(json.stringify(forceEmployed))
 		initFile:close()
+	else
+		message.channel:send("you do not have permissions to use this command")
 	end
 end, "<target>", "bypass autoemploy on target", true)
 
@@ -273,32 +299,170 @@ command.new("companyrebrand", function( message, argument ) -- PENID --
 				},
 			refrence = {message = message.id, mention = false}
 		})
+	else
+		message.channel:send("you do not have permissions to use this command")
 	end
 end, "", "", true)
 
-command.new("clash", function( message )
-	if true then
-		initFile = io.open("coc/jwt_token.json")
-		local data = json.parse(initFile:read("*a"))
-		initFile:close()
-		print(data.header, data.payload)
-		local _, clan = http.request("https://api.clashofclans.com/v1/clans/%232Q2Y88JV8", data.header, data.payload)
-		local lvlValue = math.min( clan.clanLevel / 10, 1 ) * 255
-		message.channel:send {
+local clash = require("./lua/api/clash")
+
+local server_clan = "%23" .. "2Q2Y88JV8"
+
+command.new("clan", function( message )
+	local clan = clash.getClanInfo( server_clan )
+	message.channel:send {
+		embed = {
+			title = clan.name,
+			fields = {
+				{name = "Tag", value = clan.tag, inline = false},
+				{name = "Required Trophies", value = clan.trophies, inline = true},
+				{name = "Required Townhall Level", value = clan.townhallLevel, inline = false},
+				{name = "Wins", value = clan.wins, inline = true},
+				{name = "Ties", value = clan.ties, inline = true},
+				{name = "Losses", value = clan.losses, inline = true},
+				{name = "Members", value = clan.members, inline = false},
+			},
+			description = clan.description,
+			image = {
+				url = clan.image,
+				height = 70,
+				width = 70
+			},
+			color = discordia.Color.fromRGB(clan.r, clan.g, clan.b).value,
+			timestamp = discordia.Date():toISO('T', 'Z')
+		}
+	}
+end, "", "(clash of clans) get the servers clan")
+
+command.new("war", function( message )
+	local war = clash.getWarInfo( server_clan )
+	if war then
+	message.channel:send {
+		embed = {
+			title = war.c .. " VS " .. war.o,
+			fields = {
+				{name = war.c, value = war.cTag, inline = false},
+				{name = "Destruction", value = war.cDest .. "%", inline = true},
+				{name = "Attacks", value = war.cAttacks, inline = true},
+				{name = "Stars", value = war.cStars, inline = true},
+				{name = war.o, value = war.oTag, inline = false},
+				{name = "Destruction", value = war.oDest .. "%", inline = true},
+				{name = "Attacks", value = war.oAttacks, inline = true},
+				{name = "Stars", value = war.oStars, inline = true},
+			},
+			-- description = "",
+			-- image = {
+				-- url = war.opponent.badgeUrls.small,
+				-- height = 20,
+				-- width = 20
+			-- },
+			color = discordia.Color.fromRGB(war.r, war.g, war.b).value,
+			timestamp = war.stamp
+		}
+	}
+	else
+		message.channel:send("there is no clan war currently")
+	end
+end, "", "(clash of clans) clan's war status")
+
+command.new("war_announce", function( message, arg )
+	message:delete()
+	if message.channel.id == channels.announcement then
+	local war = clash.getWarAnnounce( server_clan, client:getRole("954149526325833738"), arg )
+	message.channel:send {
+		content = war.content,
+		embed = {
+			title = war.c .. " is under attack",
+			description = war.desc,
+			fields = {
+				{name = war.o, value = war.oTag, inline = false},
+				{name = "Wins", value = war.oWins, inline = true},
+				{name = "Ties", value = war.oTies, inline = true},
+				{name = "Losses", value = war.oLosses, inline = true},
+				{name = "Members", value = war.oMembers, inline = false},
+			},
+			-- description = "",
+			-- image = {
+				-- url = war.opponent.badgeUrls.small,
+				-- height = 20,
+				-- width = 20
+			-- },
+			color = war.color,
+			timestamp = war.stamp
+		}
+	}
+	end
+end, "<description>", "(clash of clans) announce war", true)
+
+local cocLiveMessage = false
+
+command.new("war_live", function( message, arg )
+	message:delete()
+	if true then--message.channel.id == channels.announcement then
+		cocLiveMessage = clash.liveWarMessage( message.channel:send({
+			content = client:getRole("954149526325833738").mentionString,
+			embed = clash.liveEmbedInit
+		}), server_clan )
+		cocLiveMessage:update()
+	end
+end, "", "(clash of clans) sends message that will update as a war happens [testing]", true)
+
+dClock:on("minute", function()
+	if cocLiveMessage then
+		cocLiveMessage:update()
+	end
+end)
+
+command.new("twitter_id", function( message )
+	if message.author.id == users.ben then
+		local _, results = http.request("GET", "https://api.twitter.com/2/users/by/username/3Dgifdubstep", {{"Authorization", "Bearer " .. tokens.getToken( 8 )}})
+		message.channel:send("id: " .. json.parse(results).data.id)
+	end
+end, "<username>", "internal command", true)
+
+local vdsg_catalogue = {}
+for l in io.lines("./tables/vdsg.txt") do 
+	local id, content = l:match("^(%d+)%s+(.+)$")
+	table.insert(vdsg_catalogue, {id = id, content = content})
+end
+vdsg_catalogue["n"] = #vdsg_catalogue
+
+command.new("vdsg", function( message )
+	math.randomseed(os.clock())
+	local tbl = vdsg_catalogue[math.random(1, vdsg_catalogue.n)]
+	message.channel:send({
 			embed = {
-				title = "Clan: " .. clan.name,
-				description = clan.description,
-				image = {
-					url = clan.badgeUrls.small,
-					height = 70,
-					width = 70
+				title = "VDSG Catalogue No." .. tbl.id,
+				description = tbl.content,
+				timestamp = discordia.Date():toISO('T', 'Z')
+			},
+			color = discordia.Color.fromRGB(15, 255, 15).value,
+			refrence = {message = message.id, mention = false}
+		})
+end, nil, "get a vault dweller survival guide tip", true)
+
+local langton = require("./lua/langton/langton")
+
+langton.reset( "RL" )
+
+command.new("ant", function( message, arg )
+	if arg:match("^status") then
+		local stats = langton.state()
+		assert(message.channel:send({
+			embed = {
+				title = "Langton Status",
+				fields = {
+					{name = "Pattern", value = stats.patternstr, inline = false},
+					{name = "Ant Position", value = stats.position.x .. " " .. stats.position.y, inline = false},
+					{name = "Step", value = tostring( stats.itteration ), inline = false},
 				},
-				color = discordia.Color.fromRGB(255 - lvlValue, lvlValue, 0).value,
 				timestamp = discordia.Date():toISO('T', 'Z')
 			}
-		}
+		}))
+	else
+		langton.step()
 	end
-end, "", "checks status of the server's clan")
+end, "<status>", "progresses the current langton by one step")
 
 -- Role Giver --
 initFile = io.open("tables\\roleindex.json", "rb")
@@ -474,15 +638,12 @@ initFile = io.open("tables\\characterreplacers.json", "rb")
 local characterReplacers = json.parse(initFile:read("*a"))
 initFile:close()
 local latestDelMsg, latestDelAuth, latestDelAttach = "", "", {}
-local soundcloud = require("./lua/api/soundcloud")
+local soundcloud, githubAPI = require("./lua/api/soundcloud"), require("./lua/api/github")
 
 local latestMotd = {id = "", meansent = false}
 
 local sendMotd = function( skip )
-	initFile = io.open("scBackup.txt", "wb")
-	local _, result = http.request("GET", "https://raw.githubusercontent.com/Benbebop/Benbebot/main/scBackup.txt")
-	initFile:write(result)
-	initFile:close()
+	githubAPI.applyMotd()
 	local mashup, nextMashup, count, index = soundcloud.getMashup(), soundcloud.nextMashup(), soundcloud.count()
 	if nextMashup then
 		client:getUser(users.ben):getPrivateChannel():send("next Mashup of The Day: https://soundcloud.com/" .. nextMashup .. " (" .. index .. "/" .. count .. " " .. math.floor( index / count * 100 ) .. "%)")
@@ -649,4 +810,4 @@ client:on('messageCreate', function(message)
 	end
 end)
 
-client:run('Bot ' .. require("./lua/token").getToken( 1 ))
+client:run('Bot ' .. tokens.getToken( 1 ))
