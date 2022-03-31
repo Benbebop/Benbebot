@@ -8,7 +8,7 @@ function m.getDefinition( toDefine )
 		local _, result = http.request("GET", "https://dictionaryapi.com/api/v3/references/collegiate/json/" .. toDefine:lower() .. "?key=" .. getToken( 4 ))
 		local data, found = json.parse(result), false
 		
-		local toSay = "Websters Dictionary | " .. tracker.webster() .. "/" .. math.floor((1000) / 24) .. " \n"
+		local fields, title = {}, "Websters Dictionary | " .. tracker.webster() .. "/" .. math.floor((1000) / 24)
 		if data and toDefine then
 			for i,v in ipairs(data) do
 				if type(v) == "table" then
@@ -21,15 +21,14 @@ function m.getDefinition( toDefine )
 					for l,k in ipairs(v.shortdef) do
 						definition = definition .. l .. ": " .. k .. "\n"
 					end
-					toSay = toSay .. word .. "\n" .. definition
+					table.insert(fields, {name = word, value = definition, inline = false})
 				else
-					local word = "Рађ	***" .. tostring(v) .. "***"
-					toSay = toSay .. word .. "\n"
+					table.insert(fields, {name = word, value = "", inline = false})
 				end
 			end
-			return true, toSay, found
+			return true, fields, found, title
 		elseif toDefine then
-			return true, toDefine, found
+			return true, toDefine, found, title
 		end
 	else
 		return false, nil, found

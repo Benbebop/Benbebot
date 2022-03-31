@@ -1,5 +1,7 @@
 local http, json, tracker, getToken, appdata = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("./lua/appdata")
 
+appdata.init({{"otmvideos.dat"}})
+
 local m = {}
 
 function m.getSchoolAnnouncements()

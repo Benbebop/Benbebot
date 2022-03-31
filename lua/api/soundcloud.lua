@@ -1,5 +1,7 @@
 local http, json, appdata = require("coro-http"), require("json"), require("./lua/appdata")
 
+appdata.init({{"motd.dat", "{}"}})
+
 local initFile = appdata.get("motd.dat")
 local motd = json.parse(initFile:read("*a"))
 initFile:close()
