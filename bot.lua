@@ -25,9 +25,9 @@ local users = {
 
 local outputModes = {null = {255, 255, 255}, info = {0, 0, 255}, err = {255, 0, 0}, mod = {255, 100, 0}, warn = {255, 255, 0}}
 
-local max_output_len = 4048
+local max_output_len, max_foot_len = 4048, 2048
 
-function output( str, mode )
+function output( str, mode, overwrite_trace )
 	print( str )
 	if mode == "silent" then return end
 	if #str >= max_output_len then
@@ -36,6 +36,10 @@ function output( str, mode )
 	mode = mode or "null"
 	local foot = nil
 	if mode == "err" then foot = {text = debug.traceback()} end
+	if overwrite_trace then foot = {text = overwrite_trace} end
+	if #(foot or {}) >= max_output_len then
+		foot = foot:sub(1, max_foot_len / 2 - 3) .. "..." .. foot:sub(#foot - (max_foot_len / 2 - 3), -1)
+	end
 	mode = outputModes[mode] or outputModes.null
 	str = str:gsub("%d+%.%d+%.%d+%.%d+", "\\*\\*\\*.\\*\\*\\*.\\*\\*\\*.\\*\\*")
 	client:getChannel("959468256664621106"):send({
@@ -64,19 +68,22 @@ function setHoliday( holiday )
 		client:setGame(holiday.game)
 	end
 	client:setStatus(holiday.status)
-	output("today is " .. holiday.text)
+	--output("today is " .. holiday.text)
 end
 
 -- deprecated
 local catchDiscordia = proxout
 
 function sendPrevError()
-	local f = io.open("erroroutput.txt", "r")
-	local content = f:read("*a")
-	if content == "" then return end
-	output( content, "err" )
-	f:close()
-	local f = io.open("erroroutput.txt", "w") f:close()
+	local f = io.open("errorhandle/error.log", "r")
+	if f then
+		local content = f:read("*a")
+		if content == "" then return end
+		local err, trace = content:match("^(.-)\nstack traceback:\n(.-)$")
+		output( err, "err", trace )
+		f:close()
+		os.remove("errorhandle/error.log")
+	end
 end
 
 client:on('ready', function()
@@ -516,8 +523,7 @@ command.new("ant", function( message, arg )
 					{name = "Pattern", value = stats.patternstr, inline = false},
 					{name = "Ant Position", value = stats.position.x .. " " .. stats.position.y, inline = false},
 					{name = "Step", value = tostring( stats.itteration ), inline = false},
-				},
-				timestamp = discordia.Date():toISO('T', 'Z')
+				}
 			}
 		})
 	else
@@ -562,44 +568,6 @@ end, "\"<character>\" <message>", "uses http://15.ai to generate a sound file")
 
 local currentStream = nil
 
-command.new("play", function( message, arg )
-
-	output("youtube.stream api does not exist", "err") return
-	
-	-- if currentStream then
-		
-		-- currentStream:queue( arg )
-		
-	-- else
-		
-		-- if not message.member.voiceChannel then output("attempted to call play while not in voice channel", "warn") return end
-	
-		-- currentStream = youtube.stream( message.member.voiceChannel )
-		
-		-- currentStream:queue( arg )
-		
-	-- end
-	
-end, "<url>", "play a youtube video in a channel (work in progress)")
-
-command.new("stop", function( message )
-
-	output("youtube.stream api does not exist", "err") return
-	
-	-- if currentStream then
-		
-		-- currentStream:leave()
-		
-		-- currentStream = nil
-		
-	-- else
-		
-		-- output("attempted to stop playing", "warn")
-		
-	-- end
-	
-end, nil, "stop playing a youtube video (work in progress)")
-
 command.new("slowmode", function( message, arg )
 	if message.author.id == users.paul then
 		local limit, duration = arg:match("(%d+)%s*(%d*)")
@@ -635,12 +603,156 @@ command.new("reverse", function( message )
 	output(results.data)
 end, nil, "reverse image searches for an image (google doesnt like this, can get taken down)")
 
+command.new("restart", function( message )
+	if message.author.id == users.ben then
+		os.exit()
+	end
+end, nil, "restarts server")
+
+local toremind = {}
+
+command.new("remind", function( message, args )
+	local t, c, m = args:match("(%d+)%s*(%a)%s*(.-)$")
+	if c == "d" then
+		t = tonumber(t) * 1440
+	elseif c == "h" then
+		t = tonumber(t) * 60
+	elseif c == "m" then
+		t = tonumber(t)
+	else
+		output("could not parse time mode: " .. c, "warn") return
+	end
+	table.insert(toremind, {mentionString = message.member.mentionString, name = message.member.nickname or message.member.name, current = 0, total = t, message = m})
+	proxout(message.channel:send({
+		embed = {
+			description = "reminder set for " .. t .. " minutes"
+		}
+	}))
+end, "<time> <m/h/d>", "reminds you after a certain time period (note: if bot errors all current reminders are erased)")
+
+dClock:on("min", function()
+	for i in ipairs(toremind) do
+		toremind[i].current = toremind[i].current + 1
+		if toremind[i].current >= toremind[i].total then
+			proxout(client:getChannel(botChannel):send({
+				content = toremind[i].mentionString,
+				embed = {
+					title = toremind[i].name .. "'s Reminder",
+					description = toremind[i].message
+				}
+			}))
+		end
+	end
+end)
+
+command.new("pirate", function( message, arg )
+	if arg:match("^%s*list%s*$") then
+		local str = ""
+		for i in io.lines("tables/pirate.txt") do
+			str = str .. i:gsub("%s*http.-$", ",")
+		end
+		message.channel:send(str)
+		return
+	end
+	local thing = ""
+	for i in io.lines("tables/pirate.txt") do
+		if i:lower():match(arg:lower()) then
+			thing = i
+			break
+		end
+	end
+	print(thing)
+	message.channel:send(thing:match("(http.-)$"))
+end, "<movie>", "pirates a movie")
+
+command.new("play", function() end, "<url>", [[play a thing in a channel (if doesnt work check #benbebot-output and if you dont understand it, fuck you)
+
+supported formats: http://ytdl-org.github.io/youtube-dl/supportedsites.html]] )
+
+command.new("terraria", function( message, args )
+	local file = io.open("terraria/serverconfig.txt")
+	local cfg = file:read("*a")
+	proxout(message.channel:send {
+		embed = {
+			title = "Bread Bag Terraria Server",
+			fields = {
+				{name = "Server IP Address", value = "25.5.156.164", inline = false},
+				{name = "Server Port", value = cfg:match("\nport=(%d+)"), inline = false},
+				{name = "Server Password", value = cfg:match("\npassword=(.-)\n"), inline = false},
+			},
+			description = cfg:match("\nmotd=(.-)\n"),
+		}
+	})
+end, "<movie>", "terraria server data")
+
+command.new("id", function( message, args )
+	
+end, "<id>", "checks a discord id")
+
+local privacies = {n = 0}
+
+appdata.init({{"privacy.log", "0"}})
+
+command.new("privacy", function( message )
+	local f = appdata.get("privacy.log", "r")
+	if not f:read("*a"):match("%s" .. message.author.id .. "%s?") then
+		privacies[message.author.id] = message.channel.id
+		privacies.n = privacies.n + 1
+		proxout(message.channel:send {
+			embed = {
+				title = "Benbebot Privacy Policy",
+				description = "View our privacy policy\n\nhttps://github.com/Benbebop/Benbebot/blob/main/tables/bullshitPrivacyPolicy.md#privacy-policy\n\nOnce you have read this, please send in this channel:",
+				fields = {
+					{name = "I Agree", value = "if you agree to our privacy policy", inline = false},
+					{name = "I Disagree", value = "if you do not agree to our privacy policy", inline = false},
+				},
+				footer = {text = "This message was generated by " .. message.author.mentionString .. " and only applies to them. To generate your own message send \"bbb privacy\" in this server."}
+			}
+		})
+	else
+		proxout(message.channel:send {
+			embed = {
+				title = "Benbebot Privacy Policy",
+				description = "View our privacy policy\n\nhttps://github.com/Benbebop/Benbebot/blob/main/tables/bullshitPrivacyPolicy.md#privacy-policy"
+			}
+		})
+	end
+	f:close()
+end, nil, "read our privacy policy")
+
+client:on('messageCreate', function(message)
+	if privacies.n > 0 then
+		if privacies[message.author.id] == message.channel.id then
+			if message.content:lower():match("^%s*i%s*agree%s*$") then
+				local f = appdata.get("privacy.log", "a")
+				f:write(" ")
+				f:write(message.author.id)
+				f:close()
+				privacies[message.author.id] = nil
+				privacies.n = privacies.n - 1
+				output(message.author.mentionString .. " has accepted the Benbebot Privacy Policy", "info")
+			elseif message.content:lower():match("^%s*i%s*disagree%s*$") then
+				message.member:kick()
+				privacies[message.author.id] = nil
+				privacies.n = privacies.n - 1
+				output(message.author.mentionString .. " has rejected the Benbebot Privacy Policy", "info")
+			else
+				message:delete()
+			end
+		end
+	end
+end)
+
+command.new("issue", function( message )
+	proxout(message.channel:send("if you encounter an error, report it here https://github.com/Benbebop/Benbebot/issues/new"))
+end, nil, "report an issue with the bot")
+
 -- WEBHOOKS --
 
 local webhook = require("./lua/webhook")
 
-webhook.create("0.0.0.0", 8642, function(req, body)
-	output(req)
+webhook.create(nil, 8642, function(req, body)
+	output(json.stringify(req))
 end)
 
 -- Role Giver --
@@ -833,7 +945,7 @@ local sendMotd = function( skip )
 	end
 	if not skip then
 		if mashup then
-			local message = client:getGuild(myGuild):getChannel(channels.announcement):send(client:getRole("938951562447953990").mentionString .. " Mashup of The Day!\n https://soundcloud.com/" .. mashup)
+			local message = client:getGuild(myGuild):getChannel(channels.announcement):send("https://soundcloud.com/" .. mashup)
 			latestMotd.id = message.id
 			message:addReaction("👍")
 			message:addReaction("👎")
@@ -900,7 +1012,7 @@ client:on('messageCreate', function(message)
 		local fomessage = message:reply("fuck off " .. message.author.name .. " :middle_finger:")
 		if tofar then
 			message:reply("actually nevermind that message was too far")
-			output(message.author.name .. " is saying racial slurs", "mod")
+			--output(message.author.name .. " is saying racial slurs", "mod")
 		else
 			local attachStr = ""
 			if latestDelAttach then
@@ -912,7 +1024,7 @@ client:on('messageCreate', function(message)
 				content = message.mentionedUsers.first.name .. ": " .. translatedMsg .. "\n" .. attachStr
 			})
 			message:delete()
-			output(message.author.name .. " was succesfully blocked", "mod")
+			--output(message.author.name .. " was succesfully blocked", "mod")
 		end
 		local mbefore = message.channel:getMessagesBefore(fomessage.id, 1)
 		if mbefore:iter()().author.id == myId then
@@ -941,7 +1053,9 @@ client:on('memberUpdate', function(member)
 	elseif employed then
 		member:addRole("930996065329631232")
 	elseif member.nickname and member.nickname:match(company.autoemploy) then
-		local success, _, found = websters.getDefinition( member.nickname:match("%a+ier%s*$"):gsub("%s", "") )
+		local result = websters.getDefinition( member.nickname:match("%a+ier%s*$"):gsub("%s", "") )
+		if result.status == "OK" then output("something went wrong idk im too tired to write this error code, ill understand it ether way.", "err") end
+		local success, _, found = result.data[1], result.data[2], result.data[3]
 		if not success then
 			output(member.user.mentionString .. " API usage exeded, contact a mod or wait an hour bitch. https://tenor.com/view/grrr-heheheha-clash-royale-king-emote-gif-24764227", "warn")
 			return
