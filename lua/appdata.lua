@@ -10,7 +10,7 @@ end
 function m.init( data )
 	for _,v in ipairs(data) do
 		if v[1]:match("[/\\]$") then
-			--os.execute("mkdir " .. dir .. "\\benbebot\\" .. v[1]:gsub("[/\\]$", ""))
+			os.execute("mkdir " .. dir .. "\\benbebot\\" .. v[1]:gsub("[/\\]$", ""))
 		else
 			local testfor = m.get( v[1], "r" )
 			if not testfor then

@@ -42,6 +42,9 @@ function m.get( command )
 		local final = {}
 		for i,v in pairs(commands) do
 			if v.show then
+				if #v.desc > 25 then
+					v.desc = v.desc:sub(25) .. "..."
+				end
 				final[v.id] = {
 					name = i,
 					stx = v.stx,

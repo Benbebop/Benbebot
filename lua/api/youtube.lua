@@ -1,6 +1,8 @@
 local http, json, tracker, getToken, appdata = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("./lua/appdata")
 
-appdata.init({{"otmvideos.dat"}})
+appdata.init({{"otmvideos.dat"},{"player_download/"},{"player_download/ytdl.conf",[[-x
+-audio-format "wav"
+-o %LOCALAPPDATA%/Local/benbebot/player_download/nil_file]]}})
 
 local m = {}
 
@@ -58,32 +60,59 @@ function m.randomVideo()
 end
 
 local streamObj = {}
+streamObj.__index = streamObj
 
 function m.stream( channel )
 	
-	return setmetatable({channel = channel, queue = {}, current = "", exists = true}, streamObj)
+	--channel:setUserLimit(channel.userLimit + 1)
+	
+	return setmetatable({channel = channel, vc = channel:join(), songs = {}, current = "", exists = true}, streamObj)
 	
 end
 
-function streamObj:queue( url )
+function play(vc, file)
+	local file = appdata.get(file, "rb")
+	vc:playPCM(file:read('*all'))
+	file:close()
+end
+
+function download(url, index)
+	index = index or "nil_file"
+	local file = io.popen("bin\\youtube-dl.exe --no-call-home -o %LOCALAPPDATA%/benbebot/player_download/file.%(ext)s " .. url):read("*a"):match("%[download%].-(%u:[^%s]+)")
+	io.popen("bin\\ffmpeg.exe -y -i " .. file .. " %LOCALAPPDATA%/benbebot/player_download/file.wav")
+	os.remove(file)
+	return "player_download/file.wav"
+end
+
+function streamObj:queue( url, message )
 	if not self.exists then return end
-	table.insert(self.queue, url)
+	message:setContent("queueing your file")
+	table.insert(self.songs, url)
+	if self.current == "" then
+		self.current = self.songs[1]
+		table.remove(self.songs, 1)
+		message:setContent("downloading your file")
+		local fuckyoufish21 = download(url, "playdata")
+		message:setContent("downloaded file successfully")
+		play(self.vc, fuckyoufish21)
+		self.current = ""
+		message:setContent("finished playing successfully")
+	end
 end
 
 function streamObj:progress()
 	if not self.exists then return end
-	self.current = self.queue[1]
-	table.remove(self.queue, 1)
-end
-
-function streamObj:getPCM( part )
-	if not self.exists then return end
-	
+	self.current = self.songs[1] or ""
+	table.remove(self.songs, 1)
+	play(self.vc, download(url, "playdata"))
 end
 
 function streamObj:leave()
 	if not self.exists then return end
 	self.exists = false
+	self.channel, self.songs, self.current, self.vc = nil, nil, nil, nil
+	--self.channel:setUserLimit(channel.userLimit - 1)
+	self.channel:leave()
 end
 
 return m

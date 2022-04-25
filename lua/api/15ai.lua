@@ -90,14 +90,14 @@ function ai.getTTSRaw(character, text)
 		
 		local success, responseAudio = http.request("GET", audio_url .. audio_uri, tts_headers)
 		
-		if success.code ~= 200 then resp.status = "ConnectionError (" .. responseAudio .. ")" return resp end
+		if success.code ~= 200 then resp.status = "15ai Error (" .. success.reason .. ")" return resp end
 		
 		resp.status = "OK"
         resp.data = responseAudio
 		
 		return resp
 	else
-		resp.status = "ConnectionError (" .. responseAudio .. ")"
+		resp.status = "15ai Error (" .. success.reason .. ")"
 		return resp
 	end
 end

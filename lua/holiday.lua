@@ -48,6 +48,10 @@ holidays.d["1703"] = { -- ST PATRIC
 	game = nil
 }
 
+holidays.d["0704"] = { -- :)
+	game = "Alphaplace"
+}
+
 holidays.d["2106"] = { -- INDIGENOUS DAY
 	avatar = "indig.jpg",
 	name = e.ind_i .. e.ind_nu .. e.ind_k .. e.ind_ti .. e.ind_tu .. e.ind_t, -- Olittâgutik
