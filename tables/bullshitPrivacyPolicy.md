@@ -133,6 +133,6 @@ If you have any questions, concerns, or complaints regarding this Policy, the in
 justanuclearbarrel@gmail.com  
 308 Negra Arroyo Lane, Albuquerque, New Mexico 87104
 
-We will attempt to resolve complaints and disputes and make every reasonable effort to honor your wish to exercise your rights as quickly as possible and in any event, within the timescales provided by applicable data protection laws.
+We will not attempt to resolve complaints and disputes and we will not make every reasonable effort to honor your wish to exercise your rights as quickly as possible.
 
 This document was last updated on April 25, 2022
