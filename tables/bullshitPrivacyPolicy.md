@@ -3,14 +3,14 @@ Privacy policy
 
 We respect your privacy and are committed to protecting it through our compliance with this privacy policy (Policy). This Policy describes the types of information we may collect from you or that you may provide (Personal Information) through the [Benbebot](https://github.com/Benbebop/Benbebot) Discord Bot and any of its related products and services (collectively, Services), and our practices for collecting, using, maintaining, protecting, and disclosing that Personal Information. It also describes the choices available to you regarding our use of your Personal Information and how you can access and update it.
 
-This Policy is a legally binding agreement between you (User, you or your) and this Bot operator (Operator, we, us or our). If you are entering into this agreement on behalf of a business or other legal entity, you represent that you have the authority to bind such entity to this agreement, in which case the terms User, you or your shall refer to such entity. If you do not have such authority, or if you do not agree with the terms of this agreement, do it anyway (we will have to ban you otherwise). By accessing and using the Bot and Services, you acknowledge that you have read, understood, and agree to be bound by the terms of this Policy. This Policy does not apply to the practices of companies that we do not own or control, or to individuals that we do not employ or manage.
+This Policy is a legally binding agreement between you (User, you or your) and this Bot operator (Operator, we, us or our). If you are entering into this agreement on behalf of a business or other legal entity, you represent that you have the authority to bind such entity to this agreement, in which case the terms User, you or your shall refer to such entity. If you do not have such authority, or if you do not agree with the terms of this agreement, do it anyway. By accessing and using the Discord Bot, you acknowledge that you have read, understood, and agree to be bound by the terms of this Policy. This Policy does not apply to the practices of companies that we do not own or control, or to individuals that we do not employ or manage.
 
 Automatic collection of information
 -----------------------------------
 
 When you use the Discord Bot, our servers automatically record information that Discord sends. This data may include information such as your device’s IP address, browser type, and version, operating system type and version, language preferences, services of the Discord Bot that you use, the time spent on those pages, information you search with the Discord Bot, access times and dates, and other statistics.
 
-Information collected automatically is used to identify potential cases of abuse and establish statistical information regarding the usage and traffic of the Website and Services. This statistical information will be aggregated in such a way that would identify any particular User of the system.
+Information collected automatically is used to identify potential cases of abuse and establish statistical information regarding the usage and traffic of the Discord Bot. This statistical information will be aggregated in such a way that would identify any particular User of the system.
 
 Collection of personal information
 ----------------------------------
@@ -43,7 +43,7 @@ We act as a data controller and a data processor when handling Personal Informat
 
 Our role may also differ depending on the specific situation involving Personal Information. We act in the capacity of a data controller when we ask you to submit your Personal Information that is necessary to ensure your access and use of the Discord Bot. In such instances, we are a data controller because we determine the purposes and means of the processing of Personal Information.
 
-We act in the capacity of a data processor in situations when you submit Personal Information through the Website and Services. We do not own, control, or make decisions about the submitted Personal Information, and such Personal Information is processed only in accordance with your instructions. In such instances, the User providing Personal Information acts as a data controller.
+We act in the capacity of a data processor in situations when you submit Personal Information through the Discord Bot. We do not own, control, or make decisions about the submitted Personal Information, and such Personal Information is processed only in accordance with your instructions. In such instances, the User providing Personal Information acts as a data controller.
 
 In order to make the Discord Bot available to you, or to meet a legal obligation, we will need to collect and use certain Personal Information. If you do not provide the information that we request, we will kill you. Any of the information we collect from you may be used for the following purposes:
 
@@ -55,9 +55,9 @@ In order to make the Discord Bot available to you, or to meet a legal obligation
 *   Improve user experience
 *   Enforce terms and conditions and policies
 *   Doxxing
-*   Run and operate the Website and Services
+*   Run and operate the Discord Bot
 
-Processing your Personal Information depends on how you interact with the Discord Bot, where you are located in the world and if one of the following applies: (i) you have given your consent for one or more specific purposes; (ii) provision of information is necessary for the performance of an agreement with you and/or for any pre-contractual obligations thereof; (iii) processing is necessary for compliance with a legal obligation to which you are subject; (iv) processing is related to a task that is carried out in the public interest or in the exercise of official authority vested in us; (v) processing is necessary for the purposes of the legitimate interests pursued by us or by a third party. We may also combine or aggregate some of your Personal Information in order to better serve you and to improve and update our Website and Services.
+Processing your Personal Information depends on how you interact with the Discord Bot, where you are located in the world and if one of the following applies: (i) you have given your consent for one or more specific purposes; (ii) provision of information is necessary for the performance of an agreement with you and/or for any pre-contractual obligations thereof; (iii) processing is necessary for compliance with a legal obligation to which you are subject; (iv) processing is related to a task that is carried out in the public interest or in the exercise of official authority vested in us; (v) processing is necessary for the purposes of the legitimate interests pursued by us or by a third party. We may also combine or aggregate some of your Personal Information in order to better serve you and to improve and update our Discord Bot.
 
 Note that under some legislations we may be allowed to process information until you object to such processing by opting out, without having to rely on consent or any other of the legal bases. In any case, we will be reluctant to clarify the specific legal basis that applies to the processing, and in particular whether the provision of Personal Information is a statutory or contractual requirement, or a requirement necessary to enter into a contract.
 
@@ -88,44 +88,44 @@ We may use any aggregated data derived from or incorporating your Personal Infor
 Data analytics
 --------------
 
-Our Discord Bot may use third-party analytics tools that use web beacons, or other similar information-gathering technologies to collect standard internet activity and usage information. The information gathered is used to compile statistical reports on User activity such as how often Users visit our Website and Services, what pages they visit and for how long, etc. We use the information obtained from these analytics tools to monitor the performance and improve our Website and Services.
+Our Discord Bot may use third-party analytics tools that use web beacons, or other similar information-gathering technologies to collect standard internet activity and usage information. The information gathered is used to compile statistical reports on User activity such as how often Users visit our Discord Bot, what pages they visit and for how long, etc. We use the information obtained from these analytics tools to monitor the performance and improve our Discord Bot.
 
 Do Not Track signals
 --------------------
 
-Some browsers incorporate a Do Not Track feature that signals to websites you visit that you do not want to have your online activity tracked. Tracking is not the same as using or collecting information in connection with a website. For these purposes, tracking refers to collecting personally identifiable information from consumers who use or visit a website or online service as they move across different websites over time. How browsers communicate the Do Not Track signal is not yet uniform. As a result, the Website and Services are not yet set up to interpret or respond to Do Not Track signals communicated by your browser. Even so, we will never respect these signals.
+Some browsers incorporate a Do Not Track feature that signals to websites you visit that you do not want to have your online activity tracked. Tracking is not the same as using or collecting information in connection with a website. For these purposes, tracking refers to collecting personally identifiable information from consumers who use or visit a website or online service as they move across different websites over time. How browsers communicate the Do Not Track signal is not yet uniform. As a result, the Discord Bot are not yet set up to interpret or respond to Do Not Track signals communicated by your browser. Even so, we will never respect these signals.
 
 Social media features
 ---------------------
 
-Our Website and Services may include social media features, such as the Facebook and Twitter buttons, Share This buttons, etc (collectively, “Social Media Features”). These Social Media Features may collect your IP address, what page you are visiting on our Website and Services, and may set a cookie to enable Social Media Features to function properly. Social Media Features are hosted either by their respective providers or directly on our Website and Services. Your interactions with these Social Media Features are governed by the privacy policy of their respective providers.
+Our Discord Bot may include social media features, such as the Facebook and Twitter buttons, Share This buttons, etc (collectively, “Social Media Features”). These Social Media Features may collect your IP address, what page you are visiting on our Discord Bot, and may set a cookie to enable Social Media Features to function properly. Social Media Features are hosted either by their respective providers or directly on our Discord Bot. Your interactions with these Social Media Features are governed by the privacy policy of their respective providers.
 
 Links to other resources
 ------------------------
 
-The Website and Services contain links to other resources that are not owned or controlled by us. Please be aware that we are not responsible for the privacy practices of such other resources or third parties. We encourage you to be aware when you leave the Website and Services and to read the privacy statements of each and every resource that may collect Personal Information.
+The Discord Bot contain links to other resources that are not owned or controlled by us. Please be aware that we are not responsible for the privacy practices of such other resources or third parties. We encourage you to be aware when you leave the Discord Bot and to read the privacy statements of each and every resource that may collect Personal Information.
 
 Information security
 --------------------
 
-No data transmission over the Internet or wireless network can be guaranteed. Therefore, while we strive to protect your Personal Information, you acknowledge that (i) there are security and privacy limitations of the Internet which are beyond our control; (ii) the security, integrity, and privacy of any and all information and data exchanged between you and the Website and Services cannot be guaranteed; and (iii) any such information and data may be viewed or tampered with in transit by a third party, despite best efforts.
+No data transmission over the Internet or wireless network can be guaranteed. Therefore, while we strive to protect your Personal Information, you acknowledge that (i) there are security and privacy limitations of the Internet which are beyond our control; (ii) the security, integrity, and privacy of any and all information and data exchanged between you and the Discord Bot cannot be guaranteed; and (iii) any such information and data may be viewed or tampered with in transit by a third party, despite best efforts.
 
 Data breach
 -----------
 
-In the event we become aware that the security of the Website and Services has been compromised or Users’ Personal Information has been disclosed to unrelated third parties as a result of external activity, including, but not limited to, security attacks or fraud, we reserve the right to take reasonably appropriate measures, including, but not limited to, investigation and reporting, as well as notification to and cooperation with law enforcement authorities. In the event of a data breach, we will make no efforts to notify affected individuals if we believe that there is a reasonable risk of harm to the User as a result of the breach or if notice is otherwise required by law.
+In the event we become aware that the security of the Discord Bot has been compromised or Users’ Personal Information has been disclosed to unrelated third parties as a result of external activity, including, but not limited to, security attacks or fraud, we reserve the right to take reasonably appropriate measures, including, but not limited to, investigation and reporting, as well as notification to and cooperation with law enforcement authorities. In the event of a data breach, we will make no efforts to notify affected individuals if we believe that there is a reasonable risk of harm to the User as a result of the breach or if notice is otherwise required by law.
 
 Changes and amendments
 ----------------------
 
-We reserve the right to modify this Policy or its terms related to the Website and Services at any time at our discretion. When we do, we will revise the updated date at the bottom of this page, post a notification on the main page of the Website. We may also provide notice to you in other ways at our discretion, such as through the contact information you have provided.
+We reserve the right to modify this Policy or its terms related to the Discord Bot at any time at our discretion. When we do, we will revise the updated date at the bottom of this page, post a notification on the main page of the Website. We may also provide notice to you in other ways at our discretion, such as through the contact information you have provided.
 
-An updated version of this Policy will be effective immediately upon the posting of the revised Policy unless otherwise specified. Your continued use of the Website and Services after the effective date of the revised Policy (or such other act specified at that time) will constitute your consent to those changes. However, we will not, without your consent, use your Personal Information in a manner materially different than what was stated at the time your Personal Information was collected.
+An updated version of this Policy will be effective immediately upon the posting of the revised Policy unless otherwise specified. Your continued use of the Discord Bot after the effective date of the revised Policy (or such other act specified at that time) will constitute your consent to those changes. However, we will not, without your consent, use your Personal Information in a manner materially different than what was stated at the time your Personal Information was collected.
 
 Acceptance of this policy
 -------------------------
 
-You acknowledge that you have read this Policy and agree to all its terms and conditions. By accessing and using the Website and Services and submitting your information you agree to be bound by this Policy. If you do not agree to abide by the terms of this Policy, we do not care.
+You acknowledge that you have read this Policy and agree to all its terms and conditions. By accessing and using the Discord Bot and submitting your information you agree to be bound by this Policy. If you do not agree to abide by the terms of this Policy, we do not care.
 
 Contacting us
 -------------
@@ -137,4 +137,4 @@ justanuclearbarrel@gmail.com
 
 We will not attempt to resolve complaints and disputes and we will not make every reasonable effort to honor your wish to exercise your rights as quickly as possible.
 
-This document was last updated on April 25, 2022
+This document was last updated on April 26, 2022
