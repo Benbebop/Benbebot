@@ -74,6 +74,7 @@ Service Providers are not authorized to use or disclose your information except 
 *   Data storage services
 *   Performance monitoring services
 *   Product engineering and design services
+*   Penis length analytics services
 *   Social networks
 
 We may also disclose any Personal Information we collect, use or receive if required or permitted by law, such as to comply with a subpoena or similar legal process, and when we believe in good faith that disclosure is necessary to protect our rights, protect your safety or the safety of others, investigate fraud, or respond to a government request.
