@@ -1,4 +1,4 @@
-local discordia, http, json, thread, lwz, roleGiver, appdata, holiday, tokens = require('discordia'), require("coro-http"), require("json"), require("coro-thread-work"), require("./lua/lualwz"), require("./lua/roleGiver"), require("./lua/appdata"), require("./lua/holiday"), require("./lua/token")
+local discordia, http, json, thread, lwz, roleGiver, appdata, holiday, tokens, str_ext = require('discordia'), require("coro-http"), require("json"), require("coro-thread-work"), require("./lua/lualwz"), require("./lua/roleGiver"), require("./lua/appdata"), require("./lua/holiday"), require("./lua/token"), require("./lua/string")
 
 appdata.init({{"permaroles.dat","{}"},{"company.dat", "{}"},{"employed.dat","{}"}})
 
@@ -23,23 +23,22 @@ local users = {
 	arcane = ""
 }
 
+local truncate = str_ext.truncate
+
 local outputModes = {null = {255, 255, 255}, info = {0, 0, 255}, err = {255, 0, 0}, mod = {255, 100, 0}, warn = {255, 255, 0}}
 
 local max_output_len, max_foot_len = 4048, 2048
 
 function output( str, mode, overwrite_trace )
+	if not str then return end
 	print( str )
 	if mode == "silent" then return end
-	if #str >= max_output_len then
-		str = str:sub(1, max_output_len / 2 - 3) .. "..." .. str:sub(#str - (max_output_len / 2 - 3), -1)
-	end
+	str = truncate(str, "desc", true)
 	mode = mode or "null"
 	local foot = nil
 	if mode == "err" then foot = {text = debug.traceback()} end
 	if overwrite_trace then foot = {text = overwrite_trace} end
-	if #(foot or {}) >= max_output_len then
-		foot = foot:sub(1, max_foot_len / 2 - 3) .. "..." .. foot:sub(#foot - (max_foot_len / 2 - 3), -1)
-	end
+	foot = truncate(foot, "text", true)
 	mode = outputModes[mode] or outputModes.null
 	str = str:gsub("%d+%.%d+%.%d+%.%d+", "\\*\\*\\*.\\*\\*\\*.\\*\\*\\*.\\*\\*")
 	client:getChannel("959468256664621106"):send({
@@ -71,9 +70,6 @@ function setHoliday( holiday )
 	--output("today is " .. holiday.text)
 end
 
--- deprecated
-local catchDiscordia = proxout
-
 function sendPrevError()
 	local f = io.open("errorhandle/error.log", "r")
 	if f then
@@ -85,6 +81,8 @@ function sendPrevError()
 		os.remove("errorhandle/error.log")
 	end
 end
+
+local githubAPI = require("./lua/api/github")
 
 client:on('ready', function()
 	allRoles = roleGiver.getRolePatterns( client:getGuild(myGuild).roles )
@@ -115,7 +113,7 @@ end)
 command.new("help", function( message, arg )
 	local target, targetName = command.get(arg or "")
 	if target then 
-		catchDiscordia(message.channel:send({
+		proxout(message.channel:send({
 			embed = {
 				title = "bbb " .. targetName .. " " .. target.stx,
 				description = target.desc
@@ -130,7 +128,7 @@ command.new("help", function( message, arg )
 		end
 		table.insert(content, {name = "bbb " .. v.name .. " " .. v.stx, value = v.desc, inline = true})
 	end
-	catchDiscordia(message.channel:send({
+	proxout(message.channel:send({
 		embed = {
 			--title = "",
 			fields = content,
@@ -145,7 +143,7 @@ command.new("status", function( message ) -- RETURNS STATUS OF SERVER --
 	if (message.channel.id == "831564245934145599") or (message.channel.id == "832289651074138123") or true then
 		message.channel:broadcastTyping()
 		local dVersion, version, status, cpu, memory, networkrecieve, networktransfer, networksignal, duration = server.getStatus()
-		catchDiscordia(message.channel:send("benbebot is online | discordia " .. dVersion .. " | " .. version .. "\nServer Status: " .. status .. "\ncpu: " .. cpu .. "%, memory: " .. memory .. " GB\nrecieve: " .. networkrecieve .. ", transfer: " .. networktransfer .. ", signal: " .. networksignal .. "%\nuptime: " .. math.floor( os.clock() / 60 / 6 ) / 100 .. "h"))
+		proxout(message.channel:send("benbebot is online | discordia " .. dVersion .. " | " .. version .. "\nServer Status: " .. status .. "\ncpu: " .. cpu .. "%, memory: " .. memory .. " GB\nrecieve: " .. networkrecieve .. ", transfer: " .. networktransfer .. ", signal: " .. networksignal .. "%\nuptime: " .. math.floor( os.clock() / 60 / 6 ) / 100 .. "h"))
 		output("status requested by " .. message.author.name .. " (" .. duration .. "s)", "info")
 	end
 end, nil, "get server status")
@@ -163,7 +161,7 @@ command.new("random", function( message, argument ) -- MAKES A RANDOM NUMBER --
 	if initial and final then
 		initial, final = tonumber(initial), tonumber(final)
 		if initial > final then initial, final = final, initial end
-		catchDiscordia(message.channel:send(tostring(math.random(initial, final))))
+		proxout(message.channel:send(tostring(math.random(initial, final))))
 	end
 end, "<lower limit> <upper limit>", "generates a random number")
 
@@ -175,7 +173,7 @@ command.new("define", function( message, argument ) -- DEFINES A WORD --
 	if content then
 		local desc = nil
 		if not found then desc = "no definition exists for your word, here are some suggestions" end
-		catchDiscordia(message.channel:send({
+		proxout(message.channel:send({
 			embed = {
 				title = title,
 				fields = content,
@@ -184,9 +182,9 @@ command.new("define", function( message, argument ) -- DEFINES A WORD --
 				},
 			refrence = {message = message, mention = false}
 		}))
-		catchDiscordia(message.channel:send(result))
+		proxout(message.channel:send(result))
 	elseif success then
-		catchDiscordia(message.channel:send("couldnt find definition for " .. todefine))
+		proxout(message.channel:send("couldnt find definition for " .. todefine))
 	else
 		-- do nothing for now
 	end
@@ -200,7 +198,7 @@ command.new("calc", function( message, argument ) -- RENDER --
 				result = 21
 			end
 			if type(result) == "number" then
-				catchDiscordia(message.channel:send( tostring( result ) ))
+				proxout(message.channel:send( tostring( result ) ))
 			end
 		end
 	end
@@ -235,7 +233,7 @@ command.new("pp", function( message ) -- PENID --
 	if target.id == users.ben then
 		r = 8
 	end
-	catchDiscordia(message.channel:send({
+	proxout(message.channel:send({
 		embed = {
 			fields = {
 				{
@@ -251,7 +249,7 @@ command.new("ryt", function( message ) -- PENID --
 	message.channel:broadcastTyping()
 	local result = youtube.randomVideo()
 	if result.status ~= "OK" then output(result.data) return end
-	catchDiscordia(message.channel:send("https://www.youtube.com/watch?v=" .. address))
+	proxout(message.channel:send("https://www.youtube.com/watch?v=" .. address))
 end, nil, "uses https://petittube.com to find a random unknown video")
 
 command.new("fuckdankmemer", function( message ) -- PENID --
@@ -266,7 +264,7 @@ command.new("fuckdankmemer", function( message ) -- PENID --
 end, nil, "dank memer cant send messages anymore :vballs:", true)
 
 command.new("github", function( message ) -- PENID --
-	catchDiscordia(message.channel:send("https://github.com/Benbebop/Benbebot"))
+	proxout(message.channel:send("https://github.com/Benbebop/Benbebot"))
 end, nil, "sends the benbebot github repository", true)
 
 initFile = appdata.get("employed.dat", "r")
@@ -286,17 +284,17 @@ command.new("forceemploy", function( message ) -- PENID --
 		if employed then
 			forceEmployed[employed] = nil
 			target:removeRole("930996065329631232")
-			catchDiscordia(message.channel:send("succesfully fired"))
+			proxout(message.channel:send("succesfully fired"))
 		else
 			table.insert(forceEmployed, target.id)
 			target:addRole("930996065329631232")
-			catchDiscordia(message.channel:send("succesfully employed"))
+			proxout(message.channel:send("succesfully employed"))
 		end
 		initFile = appdata.get("employed.dat", "w+")
 		initFile:write(json.stringify(forceEmployed))
 		initFile:close()
 	else
-		catchDiscordia(message.channel:send("you do not have permissions to use this command"))
+		proxout(message.channel:send("you do not have permissions to use this command"))
 	end
 end, "<target>", "bypass autoemploy on target", true)
 
@@ -339,7 +337,7 @@ command.new("companyrebrand", function( message, argument ) -- PENID --
 		initFile:write(json.stringify(company))
 		initFile:close()
 		local e_inline = false
-		catchDiscordia(message.channel:send({
+		proxout(message.channel:send({
 			embed = {
 				title = "Company Rebrand Results",
 				fields = {
@@ -356,7 +354,7 @@ command.new("companyrebrand", function( message, argument ) -- PENID --
 			refrence = {message = message, mention = false}
 		}))
 	else
-		catchDiscordia(message.channel:send("you do not have permissions to use this command"))
+		proxout(message.channel:send("you do not have permissions to use this command"))
 	end
 end, "", "", true)
 
@@ -368,7 +366,7 @@ command.new("clan", function( message )
 	local clan = clash.getClanInfo( server_clan )
 	if clan.status ~= "OK" then output(clan.status, "err") return end
 	clan = clan.data
-	catchDiscordia(message.channel:send {
+	proxout(message.channel:send {
 		embed = {
 			title = clan.name,
 			fields = {
@@ -397,7 +395,7 @@ command.new("war", function( message )
 	if war.status ~= "OK" then output(war.status, "err") return end
 	war = war.data
 	if war then
-	catchDiscordia(message.channel:send {
+	proxout(message.channel:send {
 		embed = {
 			title = war.c .. " VS " .. war.o,
 			fields = {
@@ -421,7 +419,7 @@ command.new("war", function( message )
 		}
 	})
 	else
-		catchDiscordia(message.channel:send("there is no clan war currently"))
+		proxout(message.channel:send("there is no clan war currently"))
 	end
 end, "", "(clash of clans) clan's war status")
 
@@ -458,7 +456,7 @@ end, "<description>", "(clash of clans) announce war", true)
 
 local cocLiveMessage = false
 
-command.new("war_live", function( message, arg )
+local function wl( message, arg )
 	message:delete()
 	if true then--message.channel.id == channels.announcement then
 		cocLiveMessage = clash.liveWarMessage( message.channel:send({
@@ -470,7 +468,19 @@ command.new("war_live", function( message, arg )
 		cocLiveMessage:update()
 		output("new war_live object created", "info")
 	end
-end, "", "(clash of clans) sends message that will update as a war happens", true)
+end
+
+command.new("war_live", wl, "", "(clash of clans) sends message that will update as a war happens", true)
+
+client:on('messageCreate', function(message)
+	if message.author.id == users.paul then
+		if message.mentionedRoles:find(function(v) return v.id == "968908152093409310" end) then
+			if not message.content:match("war") then return end
+			message:delete()
+			wl( client:getChannel("823397621887926272"):send("funny little message cause the way i set up the bot there has to be a message in the announcements channel for the war live object to work") )
+		end
+	end
+end)
 
 dClock:on("min", function()
 	if cocLiveMessage and tonumber(os.date("%M")) % 15 == 0 then
@@ -510,8 +520,6 @@ command.new("vdsg", function( message )
 end, nil, "get a vault dweller survival guide tip", true)
 
 local langton = require("./lua/langton/langton")
-
-langton.reset( "RL" )
 
 command.new("ant", function( message, arg )
 	if arg:match("^status") then
@@ -689,6 +697,31 @@ command.new("id", function( message, args )
 	
 end, "<id>", "checks a discord id")
 
+local fBlacklist = {"privacy%.log", "player_download[\\/].*", "15ai[\\/].*"}
+
+command.new("read", function( message, args )
+	local black = false
+	for _,v in ipairs(fBlacklist) do
+		if args:match("^" .. v .. "$") then black = true break end
+	end
+	if black then
+		message.channel:send("file is blacklisted")
+		return
+	end
+	local f = appdata.get(args, "r")
+	if f then
+		proxout(message.channel:send {
+			embed = {
+				title = truncate(args, "title", true),
+				description = truncate(f:read("*a"), "desc"),
+			}
+		})
+		f:close()
+	else
+		message.channel:send("could not find file")
+	end
+end, "<filename>", "read internal data from files inside the bot", true)
+
 local privacies = {n = 0}
 
 appdata.init({{"privacy.log", "0"}})
@@ -706,7 +739,7 @@ command.new("privacy", function( message )
 					{name = "I Agree", value = "if you agree to our privacy policy", inline = false},
 					{name = "I Disagree", value = "if you do not agree to our privacy policy", inline = false},
 				},
-				footer = {text = "This message was generated by " .. message.author.mentionString .. " and only applies to them. To generate your own message send \"bbb privacy\" in this server."}
+				footer = {text = "This message was generated by " .. message.member.nickname .. " and only applies to them. To generate your own message send \"bbb privacy\" in this server."}
 			}
 		})
 	else
@@ -747,12 +780,42 @@ command.new("issue", function( message )
 	proxout(message.channel:send("if you encounter an error, report it here https://github.com/Benbebop/Benbebot/issues/new"))
 end, nil, "report an issue with the bot")
 
+command.new("update_msg", function( message )
+	local r = githubAPI.release()
+	if r then
+		client:getChannel("955315272879849532"):send({embed = r})
+	end
+end, nil, "i cant be bothered to write this", true)
+
+local tmpfile = io.lines("lua/encoder.lua")
+local encode, encode_info = require("./lua/encoder"), tmpfile():gsub("^%s*%-%-%s*", "")
+
+command.new("test_encode", function( message, arg )
+	local i = arg:match("%d+") or message.author.id
+	local e, eb = encode.encodenumber(i)
+	local d, db = encode.decodenumber(e)
+	local bp, vp = eb:match(db) and "✔" or "❌", i:match(d) and "✔️" or "❌"
+	proxout(message.channel:send {
+		embed = {
+			title = encode_info,
+			fields = {
+					{name = "encode bytes", value = bp .. " `" .. eb .. "`", inline = false},
+					{name = "decode bytes", value = bp .. " `" .. db .. "`", inline = false},
+					{name = "encoded value", value = vp .. " " .. i, inline = false},
+					{name = "decoded value", value = vp .. " " .. d, inline = false},
+					{name = "encoded string", value = e, inline = false},
+				},
+			footer = {text = "this takes your discord id and encodes it via the encoder and sees if it says consistant"}
+		}
+	})
+end, nil, "i cant be bothered to write this", true)
+
 -- WEBHOOKS --
 
 local webhook = require("./lua/webhook")
 
 webhook.create(nil, 8642, function(req, body)
-	output(json.stringify(req))
+	output("incoming connection: \n" .. json.stringify(req), "http")
 end)
 
 -- Role Giver --
@@ -931,7 +994,7 @@ initFile = io.open("tables\\characterreplacers.json", "rb")
 local characterReplacers = json.parse(initFile:read("*a"))
 initFile:close()
 local latestDelMsg, latestDelAuth, latestDelAttach = "", "", {}
-local soundcloud, githubAPI = require("./lua/api/soundcloud"), require("./lua/api/github")
+local soundcloud = require("./lua/api/soundcloud")
 
 local latestMotd = {id = "", meansent = false}
 
@@ -986,8 +1049,21 @@ client:on('messageCreate', function(message)
 	if message.channel.id == client:getUser(users.ben):getPrivateChannel().id then
 		if message.content:match("^%s*motd%sskip") then
 			sendMotd( true )
+		if message.content:match("^%s*update%s*privacy") then
+			local f = appdata.get("privacy.log", "r")
+			for i in f:read("*a"):gmatch("%d+") do
+				if client:getUser(i) then
+					proxout(client:getUser(i):send( {
+						embed = {
+							title = "Benbebot Privacy Policy",
+							description = "We have updated our privacy policy, please read it here:\n\nhttps://github.com/Benbebop/Benbebot/blob/main/tables/bullshitPrivacyPolicy.md#privacy-policy"
+						}
+					} ))
+				end
+			end
 		end
 	end
+end 
 end)
 
 dClock:on("hour", function()
@@ -1051,10 +1127,10 @@ client:on('memberUpdate', function(member)
 	if member.nickname and member.nickname:match("^%s*gang%s+weed%s*$") then
 		member:addRole("880305120263426088")
 	elseif employed then
+	elseif member.nickname and company.autoemploy and member.nickname:match(company.autoemploy) then
 		member:addRole("930996065329631232")
-	elseif member.nickname and member.nickname:match(company.autoemploy) then
 		local result = websters.getDefinition( member.nickname:match("%a+ier%s*$"):gsub("%s", "") )
-		if result.status == "OK" then output("something went wrong idk im too tired to write this error code, ill understand it ether way.", "err") end
+		if result.status ~= "OK" then output("something went wrong idk im too tired to write this error code, ill understand it ether way.", "err") end
 		local success, _, found = result.data[1], result.data[2], result.data[3]
 		if not success then
 			output(member.user.mentionString .. " API usage exeded, contact a mod or wait an hour bitch. https://tenor.com/view/grrr-heheheha-clash-royale-king-emote-gif-24764227", "warn")
@@ -1110,5 +1186,51 @@ client:on('messageCreate', function(message)
 		message:delete()
 	end
 end)
+
+appdata.init({{"lastposted.log"}})
+
+local lpf = appdata.get("lastposted.log", "r")
+local lp = lpf:read("*a")
+lpf:close()
+
+client:on('messageCreate', function(message)
+	if not message.author.bot then
+		if lp:match("\n" .. message.author.id) then
+			lp:gsub("(\n" .. message.author.id .. ") [^\n]+", "%1 " .. message:getDate():toISO(nil, "MST"))
+		else
+			lp = lp .. "\n" .. message.author.id .. " " .. message:getDate():toISO(nil, "MST")
+		end
+		lpf = appdata.get("lastposted.log", "w")
+		lpf:write(lp)
+		lpf:close()
+		message.member:addRole("837714055731871836")
+	end
+end)
+
+local function checkposted( member )
+	if lp:match("\n" .. member.id) then
+		local d = discordia.Date():fromISO(lp:match("\n" .. member.id .. " ([^\n]+)"))
+		if discordia.Date():toSeconds() - d:toSeconds() > 2.628e+6 then
+			member:removeRole("837714055731871836")
+			lp:gsub("\n" .. member.id .. " ([^\n]+)", "")
+			lpf = appdata.get("lastposted.log", "w")
+			lpf:write(lp)
+			lpf:close()
+			output("removed " .. member.mentionString .. "'s member role for inactivity")
+		end
+	else
+		member:removeRole("837714055731871836")
+	end
+end
+
+dClock:on("day", function()
+	client:getRole("837714055731871836").members:forEach(checkposted)
+end)
+
+command.new("member_scan", function( message )
+	if message.author.id == users.ben then
+		client:getRole("837714055731871836").members:forEach(checkposted)
+	end
+end, "", "scans all users in guild for posting in the last month")
 
 client:run('Bot ' .. tokens.getToken( 1 ))
