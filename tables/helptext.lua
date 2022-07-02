@@ -9,11 +9,13 @@ You can add a permarole, which will persist if you leave, with
 permarole [role name]
 Remove a permarole with
 unpermarole [role name]
+Set all current roles to permaroles
+permarole all
 note: permaroles can be setup for any role, not just the ones in "role list", you must just already have the role
 
 reccomended roles:
 
-member, pinged for stupid shit, pinged for important shit
+pinged for stupid shit, pinged for important shit
 
 type "role list" for whole list]],
 	
