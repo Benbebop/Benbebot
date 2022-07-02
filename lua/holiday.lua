@@ -1,3 +1,5 @@
+local config = require("./config")
+
 local holidays = {d = {}, m = {}}
 
 local e = {
@@ -17,9 +19,17 @@ local e = {
 local hdefault = {
 	avatar = "default.jpg",
 	name = "benbebot",
-	text = "no holiday",
+	text = false,
 	status = "",
 	game = "Sex Simulator"
+}
+
+local hnone = {
+	avatar = "default.jpg",
+	name = "benbebot",
+	text = false,
+	status = "",
+	game = "none"
 }
 
 holidays.d["0101"] = { -- NEW YEAR
@@ -35,10 +45,9 @@ holidays.d["3112"] = { -- NEW YEAR EVE
 	game = "New Year Countdown"
 }
 
-holidays.m["02"] = { -- BLACK HISTORY
-	avatar = nil,
-	name = "benbebot",
-	text = "Black History Month"
+holidays.d["1002"] = { -- BENBEBOT BDAY
+	name = e.pface .. " benbebot " .. e.pface,
+	text = "Benbebot Birthday"
 }
 
 holidays.d["1703"] = { -- ST PATRIC
@@ -52,6 +61,13 @@ holidays.d["0704"] = { -- :)
 	game = "Alphaplace"
 }
 
+holidays.d["0305"] = { -- :)
+	avatar = nil,
+	name = "benbebot",
+	text = "Thank You GoldPikaKnight",
+	game = "Minecraft"
+}
+
 holidays.d["2106"] = { -- INDIGENOUS DAY
 	avatar = "indig.jpg",
 	name = e.ind_i .. e.ind_nu .. e.ind_k .. e.ind_ti .. e.ind_tu .. e.ind_t, -- Olittâgutik
@@ -61,7 +77,7 @@ holidays.d["2106"] = { -- INDIGENOUS DAY
 
 holidays.d["2406"] = { -- FRENCH DAY
 	avatar = "quebec.jpg",
-	name = e.french .. " benbebot " .. e.french,
+	name = "benbebot",
 	text = "Saint-Jean-Baptiste Day",
 	game = "Spy TF2 Simulator"
 }
@@ -85,24 +101,30 @@ holidays.d["0508"] = { -- HERITAGE DAY
 }
 
 holidays.d["3009"] = { -- RECONCILIATION DAY
-	avatar = "first_nation.jpg",
-	name = e.circ_orange .. " benbebot " .. e.circ_orange,
-	text = "Truth and Reconciliation Day",
-	game = "none"
+	avatar = nil,
+	name = "benbebot",
+	text = "Truth and Reconciliation Day"
 }
 
-holidays.m["10"] = { -- PRIDE
-	avatar = "gay_month.jpg",
-	name = e.gay .. " benbebot " .. e.gay,
-	text = "Pride Month",
-	game = "Gay Sex Simulator"
-}
+-- holidays.m["10"] = { -- PRIDE
+	-- avatar = "gay_month.jpg",
+	-- name = e.gay .. " benbebot " .. e.gay,
+	-- text = "Pride Month",
+	-- game = "Gay Sex Simulator"
+-- }
 
 holidays.d["1010"] = { -- THANKSGIVING
 	avatar = "thanks.jpg",
 	name = e.turkey .. " benbebot " .. e.turkey,
 	text = "Thanksgiving",
 	game = ":turkey:"
+}
+
+holidays.d["1710"] = { -- THANKSGIVING
+	avatar = "poopass.jpg",
+	name = "Poopass Run",
+	text = "Poopass Run",
+	game = "Team Fortress 2"
 }
 
 holidays.d["0910"] = { -- Leif Erikson
@@ -145,8 +167,11 @@ holidays.d["2512"] = { -- CHRISTMAS
 	game = "Santa Simulator"
 }
 
-function getHoliday()
-	local h = holidays.d[os.date("%d%m")] or holidays.m[os.date("%m")] or hdefault
+function getHoliday(index)
+	if config.get().misc.suspend_holiday then
+		return hnone
+	else
+	local h = holidays.d[os.date("%d%m")] or hdefault
 	
 	for i,v in pairs(hdefault) do
 		if not h[i] then 
@@ -155,6 +180,7 @@ function getHoliday()
 	end
 	
 	return h
+	end
 end
 
 return getHoliday

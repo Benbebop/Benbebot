@@ -1,8 +1,10 @@
+local enums = require('discordia').enums
+
 local m = {}
 
 function m.parse( str )
 	if (str:lower():match("^bbb") or str:lower():match("^benbebot")) then
-		return str:lower():gsub("^bbb%s*", ""):gsub("^benbebot%s*", "")
+		return str:gsub("^bbb%s*", ""):gsub("^benbebot%s*", "")
 	else
 		return false
 	end
@@ -12,14 +14,15 @@ local commands = {}
 
 local id = 0
 
-function m.new( command, callback, syntax, desc, hidden )
+function m.new( command, callback, syntax, desc, hidden, perms )
 	id = id + 1
 	commands[command] = { 
 		func = callback, 
 		stx = syntax or "", 
 		desc = desc or "nil", 
 		show = not hidden,
-		id = id
+		id = id,
+		perms = perms or {}
 	}
 end
 
@@ -38,12 +41,13 @@ function sort(tbl)
 end
 
 function m.get( command )
+	print(command)
 	if not command then
 		local final = {}
 		for i,v in pairs(commands) do
 			if v.show then
-				if #v.desc > 25 then
-					v.desc = v.desc:sub(25) .. "..."
+				if #v.desc > 50 then
+					v.desc = v.desc:sub(50) .. "..."
 				end
 				final[v.id] = {
 					name = i,
@@ -59,9 +63,25 @@ function m.get( command )
 end
 
 function m.run( command, message )
-	local index = command:match("^[%a%_]+")
+	local index, argstr = command:match("^[%a%_]+"), command:gsub("^[%a%_]+%s*", "")
+	index = index:lower()
 	if commands[index] and message.author.id ~= "941372431082348544" then
-		commands[index].func( message, command:gsub("^[%a%_]+%s*", "") )
+		local allowed = true
+		if commands[index].perms then
+			local memberperms = message.member:getPermissions(message.channel)
+			for _,v in ipairs(commands[index].perms) do
+				allowed = allowed and memberperms:has(enums.permission[v])
+			end
+		end
+		if allowed then
+			local arguments = {}
+			for arg in argstr:gmatch("%s*([^%s]+)") do
+				table.insert(arguments, arg)
+			end
+			return pcall(commands[index].func, message, arguments, argstr )
+		else
+			message.channel:send("you are not allowed to use this command")
+		end
 	end
 end
 

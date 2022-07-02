@@ -1,8 +1,17 @@
+local encoder = require("./encoder")
+
 local m = {}
+
+local function readToken()
+	local token = io.open("token", "rb")
+	local str = encoder.decodetext(token:read("*a"))
+	token:close()
+	return str:gmatch("(.-)\n")
+end
 
 function m.getToken( index )
 	index = index
-	local token = io.lines("token")
+	local token = readToken()
 	local ftoken = ""
 	for i=1,index do
 		ftoken = token()

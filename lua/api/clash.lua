@@ -1,4 +1,4 @@
-local http, json, tracker, getToken, appdata, discordia = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("./lua/appdata"), require("discordia")
+local http, json, tracker, getToken, appdata, discordia = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("../appdata"), require("discordia")
 
 local c = {}
 

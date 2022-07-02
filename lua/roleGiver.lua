@@ -1,4 +1,4 @@
-local lwz, json, appdata = require("./lua/lualwz"), require("json"), require("./lua/appdata")
+local lwz, json, appdata = require("./lualwz"), require("json"), require("./appdata")
 
 local m = {}
 
@@ -12,6 +12,10 @@ function m.getRolePatterns( roles )
 		})
 	end)
 	return rolePatterns
+end
+
+function m.getPermaroles()
+	return json.parse(appdata.read("permaroles.dat"))
 end
 
 function m.savePermaroles( roles )

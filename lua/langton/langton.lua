@@ -1,4 +1,4 @@
-local appdata = require("./lua/appdata")
+local appdata = require("../appdata")
 
 appdata.init({{"langton/"},{"langton/ant.dat", ""}})
 

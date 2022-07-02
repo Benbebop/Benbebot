@@ -1,121 +1,61 @@
-local discordia, appdata, tokens = require('discordia'), require("./lua/appdata"), require("./lua/token")
-
-appdata.init({{"permaroles.dat","{}"},{"company.dat", "{}"},{"employed.dat","{}"}})
+local discordia, appdata, tokens, timer, config, fs = require('discordia'), require("./lua/appdata"), require("./lua/token"), require("timer"), require("./lua/config"), require("fs")
 
 local client = discordia.Client()
+local clock = discordia.Clock()
+local output = require("./lua/output")(client)
 
-local outputModes = {null = {255, 255, 255}, info = {0, 0, 255}, err = {255, 0, 0}, mod = {255, 100, 0}, warn = {255, 255, 0}}
-
-local max_output_len, max_foot_len = 4048, 2048
-
-function output( str, mode, overwrite_trace )
-	print( str )
-	if mode == "silent" then return end
-	if #str >= max_output_len then
-		str = str:sub(1, max_output_len / 2 - 3) .. "..." .. str:sub(#str - (max_output_len / 2 - 3), -1)
-	end
-	mode = mode or "null"
-	local foot = nil
-	if mode == "err" then foot = {text = debug.traceback()} end
-	if overwrite_trace then foot = {text = overwrite_trace} end
-	if #foot >= max_output_len then
-		foot = foot:sub(1, max_foot_len / 2 - 3) .. "..." .. foot:sub(#foot - (max_foot_len / 2 - 3), -1)
-	end
-	mode = outputModes[mode] or outputModes.null
-	str = str:gsub("%d+%.%d+%.%d+%.%d+", "\\*\\*\\*.\\*\\*\\*.\\*\\*\\*.\\*\\*")
-	client:getChannel("959468256664621106"):send({
-		embed = {
-			description = str,
-			color = discordia.Color.fromRGB(mode[1], mode[2], mode[3]).value,
-			footer = foot,
-			timestamp = discordia.Date():toISO('T', 'Z')
-		}
-	})
-end
+local myguild = "822165179692220476"
 
 function proxout( success, result )
 	if not success then
-		output( result, "err" )
+		o:output( result, "err" )
+	else
+		return success
 	end
 end
 
 function sendPrevError()
-	local f = io.open("errorhandle/error.log", "r")
+	local f = io.open("errorhandle/error-a.log", "r")
 	if f then
 		local content = f:read("*a")
 		if content == "" then return end
 		local err, trace = content:match("^(.-)\nstack traceback:\n(.-)$")
-		output( err, "err", trace )
+		output:o( err, "err", trace )
 		f:close()
-		os.remove("errorhandle/error.log")
+		os.remove("errorhandle/error-a.log")
 	end
 end
 
 client:on('ready', function()
 	sendPrevError()
+	clock:start()
 end) 
 
-local command, youtube = require("./lua/command"), require("./lua/api/youtube")
+local random_sounds = fs.readdirSync('resource/sound/random')
+random_sounds.n = #random_sounds
 
-client:on('messageCreate', function(message)
-	local content = command.parse(message.content)
-	if content then
-		command.run(content, message)
+local boneconnection = nil
+
+clock:on("sec", function()
+	if boneconnection and math.random(1,10000) <= config.get().audioplayer.frequency * 100 then
+		client:getGuild(myguild).me:undeafen()
+		local file = io.open('resource/sound/random/' .. random_sounds[math.random(random_sounds.n)], 'rb')
+		boneconnection:playPCM(file:read("*a"))
+		file:close()
 	end
 end)
 
-command.new("play", function( message, arg )
-	
-	if currentStream then
-		
-		currentStream:queue( arg, message.channel:send("loading please wait") )
-		
-	else
-		
-		if not message.member.voiceChannel then output("attempted to call play while not in voice channel", "warn") return end
-		
-		currentStream = youtube.stream( message.member.voiceChannel )
-		
-		currentStream:queue( arg, message.channel:send("loading please wait") )
-		
+client:on('voiceChannelJoin', function(m, c)
+	if c.id == "972359183510958170" and not boneconnection then
+		timer.sleep(500)
+		boneconnection = client:getChannel("972359183510958170"):join()
 	end
-	
-end, "<url>", "play a thing in a channel (work in progress)")
+end) 
 
-command.new("stop", function( message )
-	
-	if currentStream then
-		
-		currentStream:leave()
-		
-		currentStream = nil
-		
-	else
-		
-		 output("attempted to stop playing", "warn")
-		
-	end
-	
-end, nil, "stop playing a thing (work in progress)")
-
-command.new("skip", function( message )
-	
-	if currentStream then
-		
-		currentStream:progress()
-		
-	else
-		
-		 output("attempted to skip", "warn")
-		
-	end
-	
-end, nil, "skip playing a thing (work in progress)")
-
-client:on('voiceDisconnect', function()
-	if currentStream then
-		currentStream:leave()
-		currentStream = nil
+client:on('voiceChannelLeave', function(m, c)
+	if c.id == "972359183510958170" and c.connectedMembers:count() <= 1 and boneconnection then
+		boneconnection:close()
+		boneconnection = nil
 	end
 end) 
 

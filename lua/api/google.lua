@@ -1,4 +1,4 @@
-local http, json, appdata = require("coro-http"), require("json"), require("./lua/appdata")
+local http, json, appdata = require("coro-http"), require("json"), require("../appdata")
 
 local g = {}
 

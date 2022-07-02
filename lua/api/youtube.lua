@@ -1,4 +1,4 @@
-local http, json, tracker, getToken, appdata = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("./lua/appdata")
+local http, json, tracker, getToken, appdata = require("coro-http"), require("json"), require("./lua/api/tracker"), require("./lua/token").getToken, require("../appdata")
 
 appdata.init({{"otmvideos.dat"},{"player_download/"},{"player_download/ytdl.conf",[[-x
 -audio-format "wav"
